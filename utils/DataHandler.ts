@@ -84,6 +84,27 @@ export const getDatesRecord = async (): Promise<DatesRecordType> => {
   }
 };
 
+export const checkIfTodayHasRecord = async (): Promise<boolean> => {
+  try {
+    const storedData = await AsyncStorage.getItem("dates-record");
+    if (!storedData) return false;
+
+    const datesRecord: DatesRecordType = JSON.parse(storedData);
+    if (!datesRecord.dates || datesRecord.dates.length === 0) return false;
+
+    const sortedDates = datesRecord.dates.sort(
+      (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+    );
+    const mostRecentDate = sortedDates[0];
+
+    const today = new Date().toISOString().split("T")[0];
+    return mostRecentDate === today;
+  } catch (e) {
+    console.log("Error checking today's record:", e);
+    return false;
+  }
+};
+
 export const moodValueIntoString = (value: number): string => {
   switch (value) {
     case 0:

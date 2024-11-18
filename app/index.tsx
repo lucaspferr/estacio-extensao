@@ -3,13 +3,12 @@ import { Image, Text, View, StyleSheet } from "react-native";
 import { Link, Stack } from "expo-router";
 import Button from "@/components/Button";
 import { LinearGradient } from "expo-linear-gradient";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DropdownProvider } from "@/utils/DropdownContext";
+import { checkIfTodayHasRecord } from "@/utils/DataHandler";
 
 const Home = () => {
   const timeGreeting = () => {
     const time = new Date();
-    let greetingText = "";
+    let greetingText;
     if (time.getHours() > 18 || time.getHours() < 4) {
       greetingText = "boa noite!";
     } else if (time.getHours() > 12) {
@@ -20,22 +19,20 @@ const Home = () => {
     return `Olá, ${greetingText}\n Como você está hoje?`;
   };
 
-  const [disableNewData, setDisableNewData] = useState(false);
-  const addNewDataHandler = async () => {
-    // try {
-    //   const lastData = await AsyncStorage.getItem("dateTest");
-    //   if (lastData === dateFormatted()) {
-    //     setDisableNewData(true);
-    //   } else {
-    //     setDisableNewData(false);
-    //   }
-    // } catch (e) {
-    //   setDisableNewData(false);
-    // }
+  const [isAddDisabled, setIsAddDisabled] = useState(false);
+  const [addLabel, setAddLabel] = useState("Adicionar registro");
+  const checkTodayRecord = async () => {
+    const hasRecord = await checkIfTodayHasRecord();
+    if (hasRecord) {
+      setAddLabel("Registro já adicionado");
+    } else {
+      setAddLabel("Adicionar registro");
+    }
+    setIsAddDisabled(hasRecord);
   };
 
   useEffect(() => {
-    addNewDataHandler();
+    checkTodayRecord();
   }, []);
 
   return (
@@ -59,10 +56,10 @@ const Home = () => {
         <Text style={styles.text}>{timeGreeting()}</Text>
         <Link href={{ pathname: "/AddDataPage" }} asChild>
           <Button
-            title={"Adicionar registro"}
+            title={addLabel}
             backgroundColor={"#E4DBCC"}
             textColor={"#76726E"}
-            disabled={disableNewData}
+            disabled={isAddDisabled}
           />
         </Link>
         <Link href={{ pathname: "/ViewDataPage" }} asChild>

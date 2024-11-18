@@ -2,10 +2,9 @@ import React, { useEffect, useRef } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { captureRef } from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system";
 import Spinner from "@/components/Spinner";
 import MoodIds from "@/constants/data/MoodIds";
-import { getDataByMood, getDatesRecord } from "@/utils/DataHandler";
+import { getDataByMood } from "@/utils/DataHandler";
 import { MoodDataType } from "@/utils/LocalDataType";
 import Table from "@/components/Table";
 import styles from "@/app/ViewDataPage/styles";
@@ -24,7 +23,6 @@ const ViewDataPage = () => {
 
   const fetchData = async () => {
     if (!isLoading) return;
-    const datesRecord = await getDatesRecord();
     const moodData = await Promise.all(MoodIds.map((id) => getDataByMood(id)));
     setData(moodData);
     setIsLoading(false);
@@ -34,7 +32,6 @@ const ViewDataPage = () => {
     try {
       expandByType("Table", true);
       expandByType("Graph", false);
-      console.log("Preparando dados para exportação...");
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -43,8 +40,6 @@ const ViewDataPage = () => {
         quality: 0.8,
         result: "tmpfile",
       });
-
-      console.log("Screenshot capturado:", uri);
 
       if (!(await Sharing.isAvailableAsync())) {
         alert("Compartilhamento não disponível neste dispositivo.");
@@ -55,8 +50,6 @@ const ViewDataPage = () => {
         mimeType: "image/png",
         dialogTitle: "Compartilhar dados",
       });
-
-      console.log("Dados exportados com sucesso!");
     } catch (error) {
       console.error("Erro ao capturar screenshot:", error);
     }
